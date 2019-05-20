@@ -4,7 +4,7 @@
 ##User to set the following parameters
 
 #Define covariate directory and save modelling area shapefile to this directory
-cd <- "C://Temp//SampStrategy"
+cd <- "C://Temp"
  
 #File name of "modelling area shapefile", without the file extension
 boundfn <- "AvailP_Stage2"
@@ -12,7 +12,8 @@ boundfn <- "AvailP_Stage2"
 #Name of stage or modelling area
 area <- "Stage2"
 
-#TERN Parent material covariates on shared drive (adjust list below)
+#TERN and other covariates on the shared drive drive //SDD00707//tern_cov (ensure computer is turned on)
+#User please adjust list below by adding or removing # tags and make sure there is not comma after the last entry
 
 climate_list <- c(#"Clim_etaaann.tif",
                 #"Clim_etaajan.tif",
@@ -110,8 +111,22 @@ pm_list <- c(#"PM_Aster_ferrousIron.tif",
             #"PM_Lithology_Unit_Type.tif",
             "PM_Magnetics.tif",
             #"PM_Silica.tif",
-            "PM_Weathering_Index.tif"
+            "PM_Weathering_Index.tif",
             )
+
+pm_radiometrics_list <- c("radmap_v3_2015_filtered_ppmu.tif",
+                          "radmap_v3_2015_filtered_dose.ers",
+                          #radmap_v3_2015_filtered_pctk.ers,
+                          #radmap_v3_2015_filtered_ppmth.ers,
+                          #radmap_v3_2015_ratio_tk.ers,
+                          #radmap_v3_2015_ratio_u2t.ers,
+                          #radmap_v3_2015_ratio_uk.ers,
+                          #radmap_v3_2015_ratio_ut.ers,
+                          #radmap_v3_2015_unfiltered_dose.ers,
+                          #radmap_v3_2015_unfiltered_pctk.ers,
+                          #radmap_v3_2015_unfiltered_ppmth.ers,
+                          #radmap_v3_2015_unfiltered_ppmu.ers
+                          )
 
 #################################
 ##Processing starts here
@@ -160,6 +175,15 @@ print("Cropping relief covariates")
 for (i in seq_along(relief_list)){
   gdal_translate(src_dataset = paste("//SDD00707//TERN_COV//CoVariates//Relief//", relief_list[i], sep = ""), 
                  dst_dataset = paste(cd, "/", area, "_", relief_list[i], sep = ""),
+                 projwin = c(ulx,uly,lrx,lry))
+}
+
+#Radiometric covariate cropping and copying
+print("Cropping radiometric covariates")
+pm_radiometrics_list <- sub(pattern = ".ers", replacement = ".tif", pm_radiometrics_list)
+for (i in seq_along(pm_radiometrics_list)){
+  gdal_translate(src_dataset = paste("//SDD00707//TERN_COV//CoVariates//Radmap_v3_2015//", pm_radiometrics_list[i], sep = ""), 
+                 dst_dataset = paste(cd, "/", area, "_", pm_radiometrics_list[i], sep = ""),
                  projwin = c(ulx,uly,lrx,lry))
 }
 #End of script
