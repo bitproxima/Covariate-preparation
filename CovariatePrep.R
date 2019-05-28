@@ -3,14 +3,14 @@
 #################################
 ##User to set the following parameters
 
-#Define covariate directory and save modelling area shapefile to this directory
-cd <- "C://Temp"
+#Directory where covariates will be saved too.
+cd <- "M://Projects/PMap/Modelling/Scripts/COOBSTesting"
  
-#File name of "modelling area shapefile", without the file extension
-boundfn <- "AvailP_Stage2"
+#File name of "modelling area shapefile", without the file extension. Add this file to above directory.
+boundfn <- "TestBox"
 
 #Name of stage or modelling area
-area <- "Stage2"
+area <- "TestArea"
 
 #TERN and other covariates on the shared drive drive //SDD00707//tern_cov (ensure computer is turned on)
 #User please adjust list below by adding or removing # tags and make sure there is not comma after the last entry
@@ -105,17 +105,17 @@ pm_list <- c(#"PM_Aster_ferrousIron.tif",
             #"PM_Aster_regolithRatios_b_1.tif",
             #"PM_Aster_regolithRatios_b_2.tif",
             #"PM_Aster_regolithRatios_b_3.tif",
-            "PM_Gravity.tif",
+            #"PM_Gravity.tif",
             #"PM_Lithology_Map_Symbol.tif",
             #"PM_Lithology_Min_Geol_Age.tif",
             #"PM_Lithology_Unit_Type.tif",
-            "PM_Magnetics.tif",
+            #"PM_Magnetics.tif",
             #"PM_Silica.tif",
-            "PM_Weathering_Index.tif",
+            "PM_Weathering_Index.tif"
             )
 
-pm_radiometrics_list <- c("radmap_v3_2015_filtered_ppmu.tif",
-                          "radmap_v3_2015_filtered_dose.ers",
+pm_radiometrics_list <- c(#"radmap_v3_2015_filtered_ppmu.tif",
+                          "radmap_v3_2015_filtered_dose.ers"
                           #radmap_v3_2015_filtered_pctk.ers,
                           #radmap_v3_2015_filtered_ppmth.ers,
                           #radmap_v3_2015_ratio_tk.ers,
@@ -137,7 +137,7 @@ library(raster)
 library(gdalUtils)
 
 #Load modelling area box
-modarea <- readOGR(dsn = "M:\\Projects\\PMap\\Modelling\\StageMap", layer = boundfn)
+modarea <- readOGR(dsn = cd, layer = boundfn)
 
 #modelling area extent data
 extent <- modarea@bbox
@@ -180,10 +180,9 @@ for (i in seq_along(relief_list)){
 
 #Radiometric covariate cropping and copying
 print("Cropping radiometric covariates")
-pm_radiometrics_list <- sub(pattern = ".ers", replacement = ".tif", pm_radiometrics_list)
 for (i in seq_along(pm_radiometrics_list)){
   gdal_translate(src_dataset = paste("//SDD00707//TERN_COV//CoVariates//Radmap_v3_2015//", pm_radiometrics_list[i], sep = ""), 
-                 dst_dataset = paste(cd, "/", area, "_", pm_radiometrics_list[i], sep = ""),
+                 dst_dataset = paste(cd, "/", area, "_", sub(".ers", "", pm_radiometrics_list[i]), ".tif", sep = ""),
                  projwin = c(ulx,uly,lrx,lry))
 }
 #End of script
