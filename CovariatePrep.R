@@ -4,13 +4,17 @@
 ##User to set the following parameters
 
 #Directory where covariates will be saved too.
-cd <- "M://Projects/PMap/Modelling/Scripts/COOBSTesting"
+cd <- "C://Temp"
  
 #File name of "modelling area shapefile", without the file extension. Add this file to above directory.
 boundfn <- "TestBox"
 
 #Name of stage or modelling area
-area <- "TestArea"
+area <- "TestArea1Sec"
+
+#Cell size
+#cellsize <- 0.000833333 #3arcsec grid size
+cellsize <- 0.000277778 #1arcsec grid size
 
 #TERN and other covariates on the shared drive drive //SDD00707//tern_cov (ensure computer is turned on)
 #User please adjust list below by adding or removing # tags and make sure there is not comma after the last entry
@@ -116,18 +120,31 @@ pm_list <- c(#"PM_Aster_ferrousIron.tif",
 
 pm_radiometrics_list <- c(#"radmap_v3_2015_filtered_ppmu.tif",
                           "radmap_v3_2015_filtered_dose.ers"
-                          #radmap_v3_2015_filtered_pctk.ers,
-                          #radmap_v3_2015_filtered_ppmth.ers,
-                          #radmap_v3_2015_ratio_tk.ers,
-                          #radmap_v3_2015_ratio_u2t.ers,
-                          #radmap_v3_2015_ratio_uk.ers,
-                          #radmap_v3_2015_ratio_ut.ers,
-                          #radmap_v3_2015_unfiltered_dose.ers,
-                          #radmap_v3_2015_unfiltered_pctk.ers,
-                          #radmap_v3_2015_unfiltered_ppmth.ers,
-                          #radmap_v3_2015_unfiltered_ppmu.ers
+                          #"radmap_v3_2015_filtered_pctk.ers",
+                          #"radmap_v3_2015_filtered_ppmth.ers",
+                          #"radmap_v3_2015_ratio_tk.ers",
+                          #"radmap_v3_2015_ratio_u2t.ers",
+                          #"radmap_v3_2015_ratio_uk.ers",
+                          #"radmap_v3_2015_ratio_ut.ers",
+                          #"radmap_v3_2015_unfiltered_dose.ers",
+                          #"radmap_v3_2015_unfiltered_pctk.ers",
+                          #"radmap_v3_2015_unfiltered_ppmth.ers",
+                          #"radmap_v3_2015_unfiltered_ppmu.ers"
                           )
 
+WBBSEQ_1sec_list <- c("DEM_H_TWI_1s_WBBSEQ.tif",
+                      "DEM_S_Aspect_1s_WBBSEQ.tif",
+                      "DEM_S_FocalRange300m_1s_WBBS.tif",
+                      "DEM_S_FocalRange1000m_1s_WBB.tif",
+                      "DEM_S_Plan_Curvature_1s_WBBSEQ",
+                      "DEM_S_Profile_Curvature_1s_WBBSEQ",
+                      "DEM_S_Slope_Deg_1s_WBBSEQ",
+                      "DEM_S_Slope_Pct_1s_WBBSEQ",
+                      "DEM_S_Slope_Pct_FMedian300m_WBBSEQ",
+                      "DEM_S_Slope_Relief_1s_WBBSEQ",
+                      "MrVBF_6g_a5_1s_WBBSEQ.tif",
+                      "DEM_S_Slope_Rlf_TPI_1s_WBBSE.tif"
+                     )
 #################################
 ##Processing starts here
 setwd(cd)
@@ -149,41 +166,73 @@ lry <- extent[2,1]
 #Climate covariate cropping and copying
 print("Cropping climate covariates")
 for (i in seq_along(climate_list)){
-  gdal_translate(src_dataset = paste("//SDD00707//TERN_COV//CoVariates//Climate//", climate_list[i], sep = ""), 
-                 dst_dataset = paste(cd, "/", area, "_", climate_list[i], sep = ""),
-                 projwin = c(ulx,uly,lrx,lry))
+  gdalwarp(srcfile = paste("//SDD00707//TERN_COV//CoVariates//Climate//", climate_list[i], sep = ""), 
+                 dstfile = paste(cd, "/", area, "_", climate_list[i], sep = ""),
+                 t_srs = "EPSG:4326",
+                 te = c(ulx,lry,lrx,uly),
+                 tr = c(cellsize, -1*cellsize),
+                 overwrite = TRUE
+                 )
 }
 
 #Organisms covariate cropping and copying
 print("Cropping organisms covariates")
 for (i in seq_along(organisms_list)){
-  gdal_translate(src_dataset = paste("//SDD00707//TERN_COV//CoVariates//Organisms//", organisms_list[i], sep = ""), 
-                 dst_dataset = paste(cd, "/", area, "_", organisms_list[i], sep = ""),
-                 projwin = c(ulx,uly,lrx,lry))
+  gdalwarp(srcfile = paste("//SDD00707//TERN_COV//CoVariates//Organisms//", organisms_list[i], sep = ""), 
+           dstfile = paste(cd, "/", area, "_", organisms_list[i], sep = ""),
+           t_srs = "EPSG:4326",
+           te = c(ulx,lry,lrx,uly),
+           tr = c(cellsize, -1*cellsize),
+           overwrite = TRUE
+           )
 }
 
 #Parent material cropping and copying
 print("Cropping parent material covariates")
 for (i in seq_along(pm_list)){
-  gdal_translate(src_dataset = paste("//SDD00707//TERN_COV//CoVariates//Parent_Material//", pm_list[i], sep = ""), 
-               dst_dataset = paste(cd, "/", area, "_", pm_list[i], sep = ""),
-               projwin = c(ulx,uly,lrx,lry))
+  gdalwarp(srcfile = paste("//SDD00707//TERN_COV//CoVariates//Parent_Material//", pm_list[i], sep = ""), 
+           dstfile = paste(cd, "/", area, "_", pm_list[i], sep = ""),
+           t_srs = "EPSG:4326",
+           te = c(ulx,lry,lrx,uly),
+           tr = c(cellsize, -1*cellsize),
+           overwrite = TRUE
+           )
   }
 
 #Relief covariate cropping and copying
 print("Cropping relief covariates")
 for (i in seq_along(relief_list)){
-  gdal_translate(src_dataset = paste("//SDD00707//TERN_COV//CoVariates//Relief//", relief_list[i], sep = ""), 
-                 dst_dataset = paste(cd, "/", area, "_", relief_list[i], sep = ""),
-                 projwin = c(ulx,uly,lrx,lry))
+  gdalwarp(srcfile = paste("//SDD00707//TERN_COV//CoVariates//Relief//", relief_list[i], sep = ""), 
+           dstfile = paste(cd, "/", area, "_", relief_list[i], sep = ""),
+           t_srs = "EPSG:4326",
+           te = c(ulx,lry,lrx,uly),
+           tr = c(cellsize, -1*cellsize),
+           overwrite = TRUE
+           )
 }
 
 #Radiometric covariate cropping and copying
 print("Cropping radiometric covariates")
 for (i in seq_along(pm_radiometrics_list)){
-  gdal_translate(src_dataset = paste("//SDD00707//TERN_COV//CoVariates//Radmap_v3_2015//", pm_radiometrics_list[i], sep = ""), 
-                 dst_dataset = paste(cd, "/", area, "_", sub(".ers", "", pm_radiometrics_list[i]), ".tif", sep = ""),
-                 projwin = c(ulx,uly,lrx,lry))
+  gdalwarp(srcfile = paste("//SDD00707//TERN_COV//CoVariates//Radmap_v3_2015//", pm_radiometrics_list[i], sep = ""), 
+           dstfile = paste(cd, "/", area, "_", sub(".ers", "", pm_radiometrics_list[i], ".tif", sep = ""), sep = ""),
+           t_srs = "EPSG:4326",
+           te = c(ulx,lry,lrx,uly),
+           tr = c(cellsize, -1*cellsize),
+           overwrite = TRUE
+           )
+}
+
+#1sec WBBSEQ covariate cropping and copying
+print("Cropping 1sec WBBSEQ covariates")
+for (i in seq_along(WBBSEQ_1sec_list)){
+  gdalwarp(srcfile = paste("//SDD00707//TERN_COV//CoVariates//1sec_Covariates_WBBSEQ//", WBBSEQ_1sec_list[i], sep = ""), 
+           dstfile = paste(cd, "/", area, "_", WBBSEQ_1sec_list[i], sep = ""),
+           t_srs = "EPSG:4326",
+           te = c(ulx,lry,lrx,uly),
+           tr = c(cellsize, -1*cellsize),
+           overwrite = TRUE
+           )
 }
 #End of script
 print("Script has finished processing")
